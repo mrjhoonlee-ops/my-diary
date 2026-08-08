@@ -14,14 +14,13 @@
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
 <script>
-  // 앱을 켤 때마다(캐시된 버전이 있어도) 한 번은 무조건 최신 파일을 강제로 새로 받아온다.
-  // 이미 캐시무효화 파라미터가 붙어 들어온 요청이면 다시 돌지 않는다.
-  (function () {
-    if (window.location.search.indexOf('_r=') === -1) {
-      window.location.replace(window.location.pathname + '?_r=' + Date.now());
-    }
-  })();
-  // 백그라운드→포그라운드 복귀(bfcache) 시에도 동일하게 강제 새로고침.
+  // 서비스워커: 이후부터는 이 워커가 모든 요청을 가로채서 항상 최신 파일을 강제로 받아온다.
+  // (홈 화면 아이콘으로 켜는 경우까지 포함해서 근본적으로 캐시 문제를 해결)
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('./sw.js').catch(function(){});
+  }
+  // 혹시 서비스워커가 아직 없거나 등록 전인 경우를 위한 보조 장치:
+  // 백그라운드에서 복귀(bfcache)한 화면이면 한 번 더 강제 새로고침.
   window.addEventListener('pageshow', function(event) {
     if (event.persisted) {
       window.location.replace(window.location.pathname + '?_r=' + Date.now());
