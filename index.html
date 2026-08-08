@@ -10,6 +10,19 @@
 <meta name="apple-mobile-web-app-title" content="세줄일기">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#F7F3EA">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<script>
+  // 홈 화면 앱을 다시 열 때 iOS가 예전 화면을 그대로 복원(bfcache)하는 경우,
+  // 캐시 무시하고 강제로 새로 받아온다.
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted || (window.performance && performance.getEntriesByType('navigation')[0] && performance.getEntriesByType('navigation')[0].type === 'back_forward')) {
+      const url = window.location.pathname + '?_r=' + Date.now();
+      window.location.replace(url);
+    }
+  });
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -19,12 +32,23 @@
     --accent: #7B3B3B; --accent-soft: #B98A6F; --line: #D8D0BF;
   }
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-  html, body { margin: 0; padding: 0; background: var(--paper); color: var(--ink);
+  html, body { margin: 0; padding: 0; color: var(--ink);
     font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", sans-serif; min-height: 100vh; }
-  body { padding-bottom: 60px; }
-  .wrap { max-width: 480px; margin: 0 auto; padding: 24px 20px 40px; }
+  body {
+    padding-bottom: 60px;
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 0%, #FDFBF5 0%, var(--paper) 55%, #EFE7D6 100%);
+    position: relative;
+  }
+  body::before {
+    content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    opacity: 0.35; mix-blend-mode: multiply;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix type='matrix' values='0 0 0 0 0.16  0 0 0 0 0.15  0 0 0 0 0.13  0 0 0 0.05 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  }
+  .wrap { max-width: 480px; margin: 0 auto; padding: 24px 20px 40px; position: relative; z-index: 1; }
 
-  .app-title { text-align: center; font-family: "Noto Serif KR", serif; font-size: 14px; color: var(--ink-soft); margin-bottom: 4px; }
+  .app-title { text-align: center; font-family: "Noto Serif KR", serif; font-size: 15px; font-weight: 500; color: var(--ink); margin-bottom: 2px; }
+  .app-tagline { text-align: center; font-family: "Noto Serif KR", serif; font-style: italic; font-size: 11.5px; color: var(--ink-soft); margin-bottom: 10px; opacity: 0.85; }
   .status-bar { text-align: center; font-size: 11px; color: var(--ink-soft); margin-bottom: 16px; }
   .status-bar.error { color: var(--accent); }
 
@@ -33,9 +57,10 @@
   .nav button:active { color: var(--accent); }
   .date-block { text-align: center; flex: 1; }
   .date-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; letter-spacing: 0.12em; color: var(--ink-soft); }
-  .date-main { font-family: "Noto Serif KR", serif; font-weight: 700; font-size: 26px; margin: 2px 0; }
+  .date-main { font-family: "Noto Serif KR", serif; font-weight: 700; font-size: 28px; margin: 3px 0 2px; letter-spacing: -0.01em; }
   .date-dow { font-size: 12px; color: var(--accent); letter-spacing: 0.08em; }
-  .today-pill { display: inline-block; margin-top: 6px; font-size: 11px; color: var(--ink-soft); text-decoration: underline; cursor: pointer; }
+  .date-flourish { display: block; margin: 6px auto 0; opacity: 0.55; }
+  .today-pill { display: inline-block; margin-top: 8px; font-size: 11px; color: var(--ink-soft); text-decoration: underline; cursor: pointer; }
 
   .jump-nav { display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 10px; flex-wrap: wrap; }
   .jump-nav select {
@@ -49,28 +74,35 @@
     font-family: "IBM Plex Mono", monospace; font-size: 11px; padding: 5px 8px; border-radius: 8px; cursor: pointer; }
   .jump-nav .yr-jump button:active { background: var(--accent); color: var(--paper); border-color: var(--accent); }
 
-  .card { background: white; border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px 14px; margin-top: 22px; box-shadow: 0 1px 0 var(--line); }
+  .card { background: white; border: 1px solid var(--line); border-radius: 14px; padding: 18px 18px 14px; margin-top: 22px; box-shadow: 0 1px 0 var(--line), 0 12px 24px -18px rgba(43,42,40,0.25);
+    animation: riseIn 0.5s ease both; }
   .card-label { font-family: "IBM Plex Mono", monospace; font-size: 11px; color: var(--accent); letter-spacing: 0.1em; margin-bottom: 10px; }
   .line-row { display: flex; align-items: center; gap: 10px; border-bottom: 1px solid var(--line); padding: 9px 0; }
   .line-row:last-of-type { border-bottom: none; }
   .line-num { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--ink-soft); width: 14px; flex-shrink: 0; }
-  .line-row input { flex: 1; border: none; outline: none; background: transparent; font-size: 15px; color: var(--ink); font-family: inherit; padding: 4px 0; }
-  .line-row input::placeholder { color: #C9C2B2; }
+  .line-row input { flex: 1; border: none; outline: none; background: transparent; font-size: 15px; color: var(--ink); font-family: inherit; padding: 4px 0; transition: color 0.2s; }
+  .line-row input::placeholder { color: #C9C2B2; font-style: italic; }
+  .line-row input:focus { color: var(--accent); }
 
-  .save-btn { width: 100%; margin-top: 14px; padding: 12px; border: none; border-radius: 10px; background: var(--accent); color: var(--paper); font-size: 14px; font-weight: 500; letter-spacing: 0.03em; cursor: pointer; }
-  .save-btn:active { opacity: 0.85; }
+  .save-btn { width: 100%; margin-top: 14px; padding: 12px; border: none; border-radius: 10px; background: var(--accent); color: var(--paper); font-size: 14px; font-weight: 500; letter-spacing: 0.03em; cursor: pointer; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+  .save-btn:active { transform: scale(0.97); }
+  .save-btn.saved { background: #4F6E56; }
   .save-status { text-align: center; font-size: 11px; color: var(--ink-soft); margin-top: 8px; min-height: 14px; }
 
-  .section-title { font-family: "Noto Serif KR", serif; font-size: 15px; font-weight: 500; margin: 34px 0 4px; color: var(--ink); }
-  .section-sub { font-size: 12px; color: var(--ink-soft); margin-bottom: 16px; }
+  .section-title { font-family: "Noto Serif KR", serif; font-size: 15px; font-weight: 500; margin: 36px 0 4px; color: var(--ink); }
+  .section-sub { font-size: 12px; color: var(--ink-soft); margin-bottom: 18px; font-style: italic; }
   .timeline { position: relative; }
-  .rail { position: absolute; left: 20px; top: 6px; bottom: 6px; width: 1px; background: var(--line); }
-  .entry { position: relative; padding-left: 44px; margin-bottom: 20px; }
+  .rail { position: absolute; left: 20px; top: 6px; bottom: 6px; width: 1px;
+    background: linear-gradient(to bottom, var(--accent-soft) 0%, var(--line) 55%, transparent 100%); }
+  .entry { position: relative; padding-left: 44px; margin-bottom: 22px; animation: riseIn 0.5s ease both; }
   .entry-dot { position: absolute; left: 15px; top: 4px; width: 11px; height: 11px; border-radius: 50%; background: var(--paper); border: 2px solid var(--accent-soft); }
   .entry-year { font-family: "IBM Plex Mono", monospace; font-size: 12px; color: var(--accent); }
   .entry-ago { font-size: 11px; color: var(--ink-soft); margin-left: 6px; }
-  .entry-lines p { font-family: "Noto Serif KR", serif; font-size: 14.5px; line-height: 1.6; margin: 4px 0 2px; color: var(--ink); }
-  .empty { padding-left: 44px; font-size: 13px; color: var(--ink-soft); line-height: 1.6; }
+  .entry-lines p { font-family: "Noto Serif KR", serif; font-size: 14.5px; line-height: 1.65; margin: 4px 0 2px; color: var(--ink); }
+  .empty { padding-left: 44px; font-size: 13px; color: var(--ink-soft); line-height: 1.7; font-style: italic; }
+
+  @keyframes riseIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+  @media (prefers-reduced-motion: reduce) { .card, .entry { animation: none; } }
 
   .footer-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 16px; margin-top: 40px; }
   .footer-actions button, .footer-actions span { background: none; border: none; font-size: 12px; color: var(--ink-soft); text-decoration: underline; cursor: pointer; }
@@ -89,7 +121,11 @@
 <div class="wrap">
 
   <div class="app-title" id="appTitle">세 줄 일기</div>
+  <div class="app-tagline">오늘의 결을 조용히 적어둡니다</div>
   <div class="status-bar" id="statusBar"></div>
+  <div style="text-align:center; margin-bottom:14px;">
+    <button id="hardRefreshBtn" style="background:none;border:1px solid var(--line);border-radius:8px;padding:5px 12px;font-size:11px;color:var(--ink-soft);cursor:pointer;">🔄 새로고침 (최신 버전 받기)</button>
+  </div>
 
   <div class="nav">
     <button id="prevBtn" aria-label="이전 날">‹</button>
@@ -97,6 +133,9 @@
       <div class="date-year" id="dateYear"></div>
       <div class="date-main" id="dateMain"></div>
       <div class="date-dow" id="dateDow"></div>
+      <svg class="date-flourish" width="46" height="8" viewBox="0 0 46 8" xmlns="http://www.w3.org/2000/svg">
+        <path d="M1 4 C 8 -1, 14 9, 23 4 S 38 -1, 45 4" fill="none" stroke="#7B3B3B" stroke-width="1.1" stroke-linecap="round"/>
+      </svg>
       <div class="today-pill" id="todayPill">오늘로</div>
     </div>
     <button id="nextBtn" aria-label="다음 날">›</button>
@@ -114,15 +153,15 @@
 
   <div class="card">
     <div class="card-label">이 날의 세 줄</div>
-    <div class="line-row"><span class="line-num">1</span><input type="text" maxlength="80" id="line0" placeholder="오늘 있었던 일"></div>
-    <div class="line-row"><span class="line-num">2</span><input type="text" maxlength="80" id="line1" placeholder="오늘의 기분이나 생각"></div>
-    <div class="line-row"><span class="line-num">3</span><input type="text" maxlength="80" id="line2" placeholder="내일 기억하고 싶은 것"></div>
+    <div class="line-row"><span class="line-num">1</span><input type="text" maxlength="80" id="line0" placeholder="오늘 마음에 남은 순간"></div>
+    <div class="line-row"><span class="line-num">2</span><input type="text" maxlength="80" id="line1" placeholder="오늘의 기분, 있는 그대로"></div>
+    <div class="line-row"><span class="line-num">3</span><input type="text" maxlength="80" id="line2" placeholder="내일에게 남기고 싶은 한마디"></div>
     <button class="save-btn" id="saveBtn">저장</button>
     <div class="save-status" id="saveStatus"></div>
   </div>
 
   <div class="section-title">이 날의 기록</div>
-  <div class="section-sub">지난 해 같은 날엔 무슨 일이 있었을까요</div>
+  <div class="section-sub">시간을 거슬러, 같은 날의 나를 만나보세요</div>
   <div class="timeline" id="timeline"></div>
 
   <div class="footer-actions">
@@ -382,16 +421,23 @@ function renderTimeline() {
     return;
   }
   const rail = document.createElement('div'); rail.className = 'rail'; container.appendChild(rail);
-  found.forEach(f => {
+  found.forEach((f, idx) => {
     const yearsAgo = thisYear - f.year;
+    const fade = Math.max(0.4, 1 - yearsAgo * 0.09); // 오래된 기록일수록 옅어짐
     const el = document.createElement('div'); el.className = 'entry';
+    el.style.animationDelay = (idx * 0.07) + 's';
+    el.style.opacity = fade;
     const linesHtml = f.lines.filter(l=>l && l.trim()).map(l => `<p>${escapeHtml(l)}</p>`).join('');
-    el.innerHTML = `<div class="entry-dot"></div><div class="entry-year">${f.year}년<span class="entry-ago">${yearsAgo}년 전</span></div><div class="entry-lines">${linesHtml || '<p style="color:var(--ink-soft)">(내용 없음)</p>'}</div>`;
+    el.innerHTML = `<div class="entry-dot" style="border-color:${idx===0?'var(--accent-soft)':'var(--line)'}"></div><div class="entry-year">${f.year}년<span class="entry-ago">${yearsAgo}년 전</span></div><div class="entry-lines">${linesHtml || '<p style="color:var(--ink-soft)">(내용 없음)</p>'}</div>`;
     container.appendChild(el);
   });
 }
 
 /* ---------- 이벤트 ---------- */
+document.getElementById('hardRefreshBtn').addEventListener('click', () => {
+  const url = window.location.pathname + '?_r=' + Date.now();
+  window.location.replace(url);
+});
 document.getElementById('prevBtn').addEventListener('click', () => { selectedDate.setDate(selectedDate.getDate()-1); render(); });
 document.getElementById('nextBtn').addEventListener('click', () => { selectedDate.setDate(selectedDate.getDate()+1); render(); });
 document.getElementById('todayPill').addEventListener('click', () => { selectedDate = new Date(); selectedDate.setHours(0,0,0,0); render(); });
@@ -405,9 +451,17 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
   const lines = [document.getElementById('line0').value, document.getElementById('line1').value, document.getElementById('line2').value];
   saveEntryLocal(selectedDate, lines);
   const status = document.getElementById('saveStatus');
+  const btn = document.getElementById('saveBtn');
   renderTimeline();
 
-  if (!ghConfigured()) { status.textContent = '저장되었습니다'; setTimeout(()=>{status.textContent='';}, 1800); return; }
+  const flashSaved = (label) => {
+    btn.textContent = '✓ 남겨졌습니다';
+    btn.classList.add('saved');
+    setTimeout(() => { btn.textContent = '저장'; btn.classList.remove('saved'); }, 1400);
+    status.textContent = label;
+  };
+
+  if (!ghConfigured()) { flashSaved('저장되었습니다'); setTimeout(()=>{status.textContent='';}, 1800); return; }
 
   status.textContent = 'GitHub에 저장 중…';
   try {
@@ -416,7 +470,7 @@ document.getElementById('saveBtn').addEventListener('click', async () => {
     if (hasContent) remote[isoKey(selectedDate)] = lines; else delete remote[isoKey(selectedDate)];
     replaceAllLocalEntries(remote);
     await ghSaveAll(remote);
-    status.textContent = '저장되었습니다 (GitHub 동기화 완료)';
+    flashSaved('저장되었습니다 (GitHub 동기화 완료)');
     setStatus('☁️ GitHub와 연결됨');
   } catch (err) {
     console.error(err);
