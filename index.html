@@ -127,9 +127,6 @@
   <div class="app-title" id="appTitle">세 줄 일기</div>
   <div class="app-tagline">오늘의 결을 조용히 적어둡니다</div>
   <div class="status-bar" id="statusBar"></div>
-  <div style="text-align:center; margin-bottom:14px;">
-    <button id="hardRefreshBtn" style="background:none;border:1px solid var(--line);border-radius:8px;padding:5px 12px;font-size:11px;color:var(--ink-soft);cursor:pointer;">🔄 새로고침 (최신 버전 받기)</button>
-  </div>
 
   <div class="nav">
     <button id="prevBtn" aria-label="이전 날">‹</button>
@@ -174,6 +171,10 @@
     <button id="exportBtn">백업 내보내기</button>
     <button id="importBtn">가져오기</button>
   </div>
+  <div style="text-align:center; margin-top:18px;">
+    <button id="hardRefreshBtn" style="background:none;border:1px solid var(--line);border-radius:8px;padding:5px 12px;font-size:11px;color:var(--ink-soft);cursor:pointer;">🔄 최신버전 새로고침</button>
+    <div id="versionTag" style="margin-top:8px; font-family:'IBM Plex Mono',monospace; font-size:10px; color:var(--ink-soft); opacity:0.7;"></div>
+  </div>
   <input type="file" id="importFile" accept="application/json" style="display:none">
 
 </div>
@@ -210,6 +211,9 @@
 </div>
 
 <script>
+/* 배포할 때마다 이 값을 바꿔주세요. 화면 하단에 표시되어 최신 버전인지 눈으로 바로 확인할 수 있습니다. */
+const APP_VERSION = '2026-08-08.1';
+
 const STORAGE_PREFIX = 'diary3:';
 const AUTHOR_KEY = 'diary3:author';
 const GH_CONFIG_KEY = 'diary3:ghconfig';
@@ -442,6 +446,7 @@ document.getElementById('hardRefreshBtn').addEventListener('click', () => {
   const url = window.location.pathname + '?_r=' + Date.now();
   window.location.replace(url);
 });
+document.getElementById('versionTag').textContent = `버전 ${APP_VERSION}`;
 document.getElementById('prevBtn').addEventListener('click', () => { selectedDate.setDate(selectedDate.getDate()-1); render(); });
 document.getElementById('nextBtn').addEventListener('click', () => { selectedDate.setDate(selectedDate.getDate()+1); render(); });
 document.getElementById('todayPill').addEventListener('click', () => { selectedDate = new Date(); selectedDate.setHours(0,0,0,0); render(); });
